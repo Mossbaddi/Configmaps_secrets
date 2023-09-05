@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-flask-app
+spec:
+  replicas: 1
+  selector:                           
+    matchLabels:
+      app: my-flask-app
+  template:
+    metadata:
+      labels:
+        app: my-flask-app
+    spec:
+      containers:
+        - name: my-flask-app
+          image: myflaskapp
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KEY1
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: KEY1
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-flask-app-srv
+spec:
+  type: NodePort
+  selector:
+    app: my-flask-app
+  ports:
+    - name: my-flask-app
+      protocol: TCP
+      port: 8083
+      targetPort: 80
+
+
